@@ -114,7 +114,8 @@ namespace Microsoft.Framework.Runtime
                         project,
                         target,
                         () => projectExport.Value,
-                        () => CompositeResourceProvider.Default.GetResources(project));
+                        () => CompositeResourceProvider.Default.GetResources(project),
+                        _serviceProvider);
 
                     metadataReferences.Add(projectReference);
 

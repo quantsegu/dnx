@@ -25,24 +25,27 @@ namespace Microsoft.Framework.PackageManager
     public class RestoreCommand
     {
         private static readonly int MaxDegreesOfConcurrency = Environment.ProcessorCount;
+        private readonly bool _isMono;
 
         public RestoreCommand() :
             this(fallbackFramework: null)
         {
         }
 
-        public RestoreCommand(IApplicationEnvironment env) :
-            this(env.RuntimeFramework)
+        public RestoreCommand(IApplicationEnvironment env, bool isMono) :
+            this(env.RuntimeFramework, isMono: isMono)
         {
         }
 
-        public RestoreCommand(FrameworkName fallbackFramework)
+        public RestoreCommand(FrameworkName fallbackFramework, bool isMono)
         {
             FallbackFramework = fallbackFramework;
             FileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
             MachineWideSettings = new CommandLineMachineWideSettings();
             ScriptExecutor = new ScriptExecutor();
             ErrorMessages = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+            _isMono = isMono;
+
             Reports = new Reports
             {
                 Information = new NullReport(),
@@ -214,7 +217,7 @@ namespace Microsoft.Framework.PackageManager
 
             if (!SkipRestoreEvents)
             {
-                if (!ScriptExecutor.Execute(project, "prerestore", getVariable))
+                if (!ScriptExecutor.Execute(project, "prerestore", getVariable, _isMono))
                 {
                     ErrorMessages.GetOrAdd("prerestore", _ => new List<string>()).Add(ScriptExecutor.ErrorMessage);
                     Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
@@ -478,14 +481,14 @@ namespace Microsoft.Framework.PackageManager
 
             if (!SkipRestoreEvents)
             {
-                if (!ScriptExecutor.Execute(project, "postrestore", getVariable))
+                if (!ScriptExecutor.Execute(project, "postrestore", getVariable, _isMono))
                 {
                     ErrorMessages.GetOrAdd("postrestore", _ => new List<string>()).Add(ScriptExecutor.ErrorMessage);
                     Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
                     return false;
                 }
 
-                if (!ScriptExecutor.Execute(project, "prepare", getVariable))
+                if (!ScriptExecutor.Execute(project, "prepare", getVariable, _isMono))
                 {
                     ErrorMessages.GetOrAdd("prepare", _ => new List<string>()).Add(ScriptExecutor.ErrorMessage);
                     Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
@@ -900,7 +903,7 @@ namespace Microsoft.Framework.PackageManager
 
         private bool RestoringInParallel()
         {
-            return FeedOptions.Parallel && !PlatformHelper.IsMono;
+            return FeedOptions.Parallel && !_isMono;
         }
 
         // Based on http://blogs.msdn.com/b/pfxteam/archive/2012/03/05/10278165.aspx
