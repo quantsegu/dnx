@@ -134,8 +134,7 @@ namespace Microsoft.Framework.Runtime
         public static string GetReferenceAssembliesPath()
         {
 #if DNX451
-            var isMono = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-            if (isMono)
+            if (RuntimeEnvironmentHelper.IsMono(CallContextServiceLocator.Locator.ServiceProvider))
             {
                 var mscorlibLocationOnThisRunningMonoInstance = typeof(object).GetTypeInfo().Assembly.Location;
 
@@ -179,7 +178,7 @@ namespace Microsoft.Framework.Runtime
 
             // Skip this on mono since it has a slightly different set of reference assemblies at a different
             // location
-            var isMono = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+            var isMono = RuntimeEnvironmentHelper.IsMono(CallContextServiceLocator.Locator.ServiceProvider);
             if (!isMono && FrameworkDefinitions.TryPopulateFrameworkFastPath(targetFramework.Identifier, targetFramework.Version, referenceAssembliesPath, out frameworkInfo))
             {
                 return frameworkInfo;

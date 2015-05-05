@@ -11,6 +11,7 @@ using System.Text;
 using Microsoft.Framework.PackageManager;
 using Microsoft.Framework.Runtime;
 using Microsoft.Framework.Runtime.Infrastructure;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Framework.CommonTestUtils
 {
@@ -162,9 +163,8 @@ namespace Microsoft.Framework.CommonTestUtils
             runtimeHomePath = CreateTempDir();
             runtimeName = Path.GetFileNameWithoutExtension(runtimeNupkg);
             var runtimeRoot = Path.Combine(runtimeHomePath, "runtimes", runtimeName);
-
-            var isMono = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-            if (!isMono)
+            
+            if (!RuntimeEnvironmentHelper.IsMono(CurrentRuntimeEnvironment))
             {
                 System.IO.Compression.ZipFile.ExtractToDirectory(runtimeNupkg, runtimeRoot);
             }
@@ -383,7 +383,7 @@ namespace Microsoft.Framework.CommonTestUtils
             var p = (int)Environment.OSVersion.Platform;
             return (p != 4) && (p != 6) && (p != 128);
 #else
-            return ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows";
+            return RuntimeEnvironmentHelper.IsWindows(CurrentRuntimeEnvironment);
 #endif
         }
     }

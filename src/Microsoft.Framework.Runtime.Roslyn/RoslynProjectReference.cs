@@ -271,8 +271,7 @@ namespace Microsoft.Framework.Runtime.Roslyn
         {
             try
             {
-                var isMono = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-                if (isMono)
+                if (RuntimeEnvironmentHelper.IsMono(CallContextServiceLocator.Locator.ServiceProvider))
                 {
                     return false;
                 }

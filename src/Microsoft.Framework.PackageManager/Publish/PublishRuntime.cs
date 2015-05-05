@@ -13,11 +13,11 @@ namespace Microsoft.Framework.PackageManager.Publish
         private readonly string _runtimePath;
         private readonly bool _isMono;
 
-        public PublishRuntime(PublishRoot root, FrameworkName frameworkName, string runtimePath, bool isMono)
+        public PublishRuntime(PublishRoot root, FrameworkName frameworkName, string runtimePath)
         {
             _frameworkName = frameworkName;
             _runtimePath = runtimePath;
-            _isMono = isMono;
+            _isMono = root.IsMono;
             Name = new DirectoryInfo(_runtimePath).Name;
             TargetPath = Path.Combine(root.TargetPackagesPath, Name);
         }

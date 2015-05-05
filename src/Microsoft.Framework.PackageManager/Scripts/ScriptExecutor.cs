@@ -14,8 +14,14 @@ namespace Microsoft.Framework.PackageManager
     public class ScriptExecutor
     {
         private static readonly string ErrorMessageTemplate = "The '{0}' script failed with status code {1}.";
+        private bool _isMono;
 
-        public bool Execute(Runtime.Project project, string scriptName, Func<string, string> getVariable, bool isMono)
+        public ScriptExecutor(bool isMono)
+        {
+            _isMono = isMono;
+        }
+
+        public bool Execute(Runtime.Project project, string scriptName, Func<string, string> getVariable)
         {
             IEnumerable<string> scriptCommandLines;
             if (!project.Scripts.TryGetValue(scriptName, out scriptCommandLines))
@@ -37,7 +43,7 @@ namespace Microsoft.Framework.PackageManager
                     continue;
                 }
 
-                if (!isMono)
+                if (!_isMono)
                 {
                     // Forward-slash is used in script blocked only. Replace them with back-slash to correctly
                     // locate the script. The directory separator is platform-specific. 

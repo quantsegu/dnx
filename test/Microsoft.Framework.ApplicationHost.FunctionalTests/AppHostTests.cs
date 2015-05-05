@@ -135,7 +135,7 @@ namespace Microsoft.Framework.ApplicationHost
             var runtimeTargetFramework = new FrameworkName(runtimeTargetFrameworkString);
             var runtimeTargetFrameworkShortName = VersionUtility.GetShortFrameworkName(runtimeTargetFramework);
             var runtimeType = flavor == "coreclr" ? "CoreCLR" : "CLR";
-            runtimeType = PlatformHelper.IsMono ? "Mono" : runtimeType;
+            runtimeType = TestUtils.CurrentRuntimeEnvironment.RuntimeType == "Mono" ? "Mono" : runtimeType;
             var runtimeHomeDir = TestUtils.GetRuntimeHomeDir(flavor, os, architecture);
             var projectJsonContents = @"{
   ""frameworks"": {

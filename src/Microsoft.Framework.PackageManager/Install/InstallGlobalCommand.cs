@@ -18,15 +18,14 @@ namespace Microsoft.Framework.PackageManager
 
         private readonly IAppCommandsRepository _commandsRepository;
 
-        private readonly IServiceProvider _services;
+        private readonly IRuntimeEnvironment _runtimeEnv;
 
         public InstallGlobalCommand(IApplicationEnvironment env,
                                     IAppCommandsRepository commandsRepository,
-                                    IServiceProvider services)
+                                    IRuntimeEnvironment runtimeEnv)
         {
-            _services = services;
-            var isMono = ((IRuntimeEnvironment)_services.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-            RestoreCommand = new RestoreCommand(env, isMono);
+            _runtimeEnv = runtimeEnv;
+            RestoreCommand = new RestoreCommand(env, RuntimeEnvironmentHelper.IsMono(runtimeEnv));
             _commandsRepository = commandsRepository;
         }
 
@@ -248,7 +247,7 @@ namespace Microsoft.Framework.PackageManager
 
             IEnumerable<string> allAppCommandsFiles;
 
-            var isWindows = ((IRuntimeEnvironment)_services.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows";
+            var isWindows = RuntimeEnvironmentHelper.IsWindows(_runtimeEnv);
             if (isWindows)
             {
                 allAppCommandsFiles = Directory.EnumerateFiles(commandsFolder, "*.cmd");

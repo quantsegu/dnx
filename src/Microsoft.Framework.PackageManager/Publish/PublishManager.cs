@@ -22,11 +22,11 @@ namespace Microsoft.Framework.PackageManager.Publish
             _hostServices = hostServices;
             _options = options;
             _options.ProjectDir = Normalize(_options.ProjectDir);
-            _isMono = ((IRuntimeEnvironment)_hostServices.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+            _isMono = RuntimeEnvironmentHelper.IsMono(_hostServices);
 
             var outputDir = _options.OutputDir ?? Path.Combine(_options.ProjectDir, "bin", "output");
             _options.OutputDir = Normalize(outputDir);
-            ScriptExecutor = new ScriptExecutor();
+            ScriptExecutor = new ScriptExecutor(_isMono);
         }
 
         public ScriptExecutor ScriptExecutor { get; private set; }
@@ -91,7 +91,7 @@ namespace Microsoft.Framework.PackageManager.Publish
 
             var frameworkContexts = new Dictionary<FrameworkName, DependencyContext>();
 
-            var root = new PublishRoot(project, outputPath, _hostServices, _options.Reports)
+            var root = new PublishRoot(project, outputPath, _hostServices, _options.Reports, _isMono)
             {
                 Configuration = _options.Configuration,
                 NoSource = _options.NoSource
@@ -102,13 +102,13 @@ namespace Microsoft.Framework.PackageManager.Publish
                 return null;
             };
 
-            if (!ScriptExecutor.Execute(project, "prepare", getVariable, _isMono))
+            if (!ScriptExecutor.Execute(project, "prepare", getVariable))
             {
                 _options.Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
                 return false;
             }
 
-            if (!ScriptExecutor.Execute(project, "prepublish", getVariable, _isMono))
+            if (!ScriptExecutor.Execute(project, "prepublish", getVariable))
             {
                 _options.Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
                 return false;
@@ -261,7 +261,7 @@ namespace Microsoft.Framework.PackageManager.Publish
 
             var success = root.Emit();
 
-            if (!ScriptExecutor.Execute(project, "postpublish", getVariable, _isMono))
+            if (!ScriptExecutor.Execute(project, "postpublish", getVariable))
             {
                 _options.Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
                 return false;
@@ -286,7 +286,7 @@ namespace Microsoft.Framework.PackageManager.Publish
                 return false;
             }
 
-            root.Runtimes.Add(new PublishRuntime(root, frameworkName, runtimePath, _isMono));
+            root.Runtimes.Add(new PublishRuntime(root, frameworkName, runtimePath));
             return true;
         }
 

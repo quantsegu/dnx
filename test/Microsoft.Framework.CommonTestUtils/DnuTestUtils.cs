@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.Framework.CommonTestUtils;
 using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Infrastructure;
 
 namespace Microsoft.Framework.PackageManager
 {

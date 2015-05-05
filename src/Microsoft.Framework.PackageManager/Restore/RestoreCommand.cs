@@ -27,8 +27,8 @@ namespace Microsoft.Framework.PackageManager
         private static readonly int MaxDegreesOfConcurrency = Environment.ProcessorCount;
         private readonly bool _isMono;
 
-        public RestoreCommand() :
-            this(fallbackFramework: null)
+        public RestoreCommand(bool isMono) :
+            this(fallbackFramework: null, isMono: isMono)
         {
         }
 
@@ -42,7 +42,7 @@ namespace Microsoft.Framework.PackageManager
             FallbackFramework = fallbackFramework;
             FileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
             MachineWideSettings = new CommandLineMachineWideSettings();
-            ScriptExecutor = new ScriptExecutor();
+            ScriptExecutor = new ScriptExecutor(isMono);
             ErrorMessages = new Dictionary<string, List<string>>(StringComparer.Ordinal);
             _isMono = isMono;
 
@@ -217,7 +217,7 @@ namespace Microsoft.Framework.PackageManager
 
             if (!SkipRestoreEvents)
             {
-                if (!ScriptExecutor.Execute(project, "prerestore", getVariable, _isMono))
+                if (!ScriptExecutor.Execute(project, "prerestore", getVariable))
                 {
                     ErrorMessages.GetOrAdd("prerestore", _ => new List<string>()).Add(ScriptExecutor.ErrorMessage);
                     Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
@@ -481,14 +481,14 @@ namespace Microsoft.Framework.PackageManager
 
             if (!SkipRestoreEvents)
             {
-                if (!ScriptExecutor.Execute(project, "postrestore", getVariable, _isMono))
+                if (!ScriptExecutor.Execute(project, "postrestore", getVariable))
                 {
                     ErrorMessages.GetOrAdd("postrestore", _ => new List<string>()).Add(ScriptExecutor.ErrorMessage);
                     Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);
                     return false;
                 }
 
-                if (!ScriptExecutor.Execute(project, "prepare", getVariable, _isMono))
+                if (!ScriptExecutor.Execute(project, "prepare", getVariable))
                 {
                     ErrorMessages.GetOrAdd("prepare", _ => new List<string>()).Add(ScriptExecutor.ErrorMessage);
                     Reports.Error.WriteLine(ScriptExecutor.ErrorMessage);

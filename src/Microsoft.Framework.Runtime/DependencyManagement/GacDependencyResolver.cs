@@ -18,7 +18,7 @@ namespace Microsoft.Framework.Runtime
 
         public GacDependencyResolver(IServiceProvider services)
         {
-            _isMono = ((IRuntimeEnvironment)services.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+            _isMono = RuntimeEnvironmentHelper.IsMono(services);
         }
 
         public IEnumerable<string> GetAttemptedPaths(FrameworkName targetFramework)

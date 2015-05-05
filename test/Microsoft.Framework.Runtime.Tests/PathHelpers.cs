@@ -1,12 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Framework.Runtime.Infrastructure;
+using Microsoft.Framework.CommonTestUtils;
 
 namespace Microsoft.Framework.Runtime.Tests
 {
@@ -15,8 +12,8 @@ namespace Microsoft.Framework.Runtime.Tests
         public static string GetRootedPath(params string[] paths)
         {
             string root = "/root";
-            var isWindows = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows";
-            if (isWindows)
+
+            if (RuntimeEnvironmentHelper.IsWindows(TestUtils.CurrentRuntimeEnvironment))
             {
                 root = @"C:\";
             }

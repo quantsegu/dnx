@@ -10,7 +10,6 @@ using NuGet.Frameworks;
 using NuGet.Versioning;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.Runtime.Internal;
-using System.Diagnostics;
 
 namespace Microsoft.Framework.Runtime.Dependencies
 {
@@ -164,10 +163,9 @@ namespace Microsoft.Framework.Runtime.Dependencies
                     "Reference Assemblies", "Microsoft", "Framework");
         }
 
-        
         private FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework)
         {
-            var isMono = ((IRuntimeEnvironment)_services.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+            var isMono = RuntimeEnvironmentHelper.IsMono(_services);
             string referenceAssembliesPath = GetReferenceAssembliesPath(isMono);
 
             if (string.IsNullOrEmpty(referenceAssembliesPath))

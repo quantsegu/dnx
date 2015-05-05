@@ -19,11 +19,11 @@ namespace Microsoft.Framework.PackageManager
         // Key = command; Value = app name
         private IDictionary<string, NuGet.PackageInfo> _commands = new Dictionary<string, NuGet.PackageInfo>();
 
-        public AppCommandsFolderRepository(string commandsFolder, IServiceProvider services)
+        public AppCommandsFolderRepository(string commandsFolder, IRuntimeEnvironment runtimeEnv)
         {
             _commandsFolder = new NuGet.PhysicalFileSystem(commandsFolder);
             _pathResolver = new DefaultPackagePathResolver(_commandsFolder);
-            _isWindows = ((IRuntimeEnvironment)services.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows";
+            _isWindows = RuntimeEnvironmentHelper.IsWindows(runtimeEnv);
         }
 
         public IPackagePathResolver PathResolver
@@ -127,7 +127,7 @@ namespace Microsoft.Framework.PackageManager
             }
         }
 
-        public static AppCommandsFolderRepository Create(string installPath, IServiceProvider services)
+        public static AppCommandsFolderRepository Create(string installPath, IRuntimeEnvironment runtimeEnv)
         {
             var binFolder = installPath;
             var installPackagesFolder = Path.Combine(binFolder, InstallGlobalCommand.TargetPackagesFolderName);
@@ -139,13 +139,13 @@ namespace Microsoft.Framework.PackageManager
                 File.WriteAllText(installGlobalJsonPath, @"{""packages"":"".""}");
             }
 
-            var repo = new AppCommandsFolderRepository(binFolder, services);
+            var repo = new AppCommandsFolderRepository(binFolder, runtimeEnv);
             repo.Load();
 
             return repo;
         }
 
-        public static AppCommandsFolderRepository CreateDefault(IServiceProvider services)
+        public static AppCommandsFolderRepository CreateDefault(IRuntimeEnvironment runtimeEnv)
         {
             // TODO: use Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) when it's available on CoreCLR
             var userProfileFolder = Environment.GetEnvironmentVariable("USERPROFILE");
@@ -165,7 +165,7 @@ namespace Microsoft.Framework.PackageManager
                 "bin");
             Directory.CreateDirectory(binFolder);
 
-            return Create(binFolder, services);
+            return Create(binFolder, runtimeEnv);
         }
     }
 }

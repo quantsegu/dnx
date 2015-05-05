@@ -17,7 +17,7 @@ namespace Microsoft.Framework.PackageManager.Publish
         private readonly Runtime.Project _project;
         public static readonly string AppRootName = "approot";
 
-        public PublishRoot(Runtime.Project project, string outputPath, IServiceProvider hostServices, Reports reports)
+        public PublishRoot(Runtime.Project project, string outputPath, IServiceProvider hostServices, Reports reports, bool isMono)
         {
             _project = project;
             Reports = reports;
@@ -29,6 +29,7 @@ namespace Microsoft.Framework.PackageManager.Publish
             TargetPackagesPath = Path.Combine(outputPath, AppRootName, "packages");
             Operations = new PublishOperations();
             LibraryDependencyContexts = new Dictionary<Library, IList<DependencyContext>>();
+            IsMono = isMono;
         }
 
         public string OutputPath { get; private set; }
@@ -37,6 +38,7 @@ namespace Microsoft.Framework.PackageManager.Publish
 
         public bool NoSource { get; set; }
         public string Configuration { get; set; }
+        public bool IsMono { get; private set; }
 
         public IList<PublishRuntime> Runtimes { get; set; }
         public IList<PublishProject> Projects { get; private set; }
@@ -161,8 +163,7 @@ exec ""{2}{3}"" --appbase ""${0}"" Microsoft.Framework.ApplicationHost {4} ""$@"
                 File.WriteAllText(scriptPath,
                     string.Format(template, EnvironmentNames.AppBase, relativeAppBase, runtimeFolder, Runtime.Constants.BootstrapperExeName, commandName).Replace("\r\n", "\n"));
 
-                var isMono = ((IRuntimeEnvironment)HostServices.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-                if (isMono)
+                if (RuntimeEnvironmentHelper.IsMono(HostServices))
                 {
                     if (!FileOperationUtils.MarkExecutable(scriptPath))
                     {

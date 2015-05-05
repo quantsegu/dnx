@@ -27,7 +27,7 @@ namespace Microsoft.Framework.PackageManager
 
             _applicationEnvironment = (IApplicationEnvironment)hostServices.GetService(typeof(IApplicationEnvironment));
 
-            ScriptExecutor = new ScriptExecutor();
+            ScriptExecutor = new ScriptExecutor(RuntimeEnvironmentHelper.IsMono(_hostServices));
         }
 
         public ScriptExecutor ScriptExecutor { get; private set; }
@@ -59,16 +59,14 @@ namespace Microsoft.Framework.PackageManager
                 return false;
             }
 
-            var isMono = ((IRuntimeEnvironment)_hostServices.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-
             if (_buildOptions.GeneratePackages &&
-                !ScriptExecutor.Execute(project, "prepack", GetScriptVariable, isMono))
+                !ScriptExecutor.Execute(project, "prepack", GetScriptVariable))
             {
                 LogError(ScriptExecutor.ErrorMessage);
                 return false;
             }
 
-            if (!ScriptExecutor.Execute(project, "prebuild", GetScriptVariable, isMono))
+            if (!ScriptExecutor.Execute(project, "prebuild", GetScriptVariable))
             {
                 LogError(ScriptExecutor.ErrorMessage);
                 return false;
@@ -196,14 +194,14 @@ namespace Microsoft.Framework.PackageManager
                 }
             }
 
-            if (!ScriptExecutor.Execute(project, "postbuild", GetScriptVariable, isMono))
+            if (!ScriptExecutor.Execute(project, "postbuild", GetScriptVariable))
             {
                 LogError(ScriptExecutor.ErrorMessage);
                 return false;
             }
 
             if (_buildOptions.GeneratePackages &&
-                !ScriptExecutor.Execute(project, "postpack", GetScriptVariable, isMono))
+                !ScriptExecutor.Execute(project, "postpack", GetScriptVariable))
             {
                 LogError(ScriptExecutor.ErrorMessage);
                 return false;

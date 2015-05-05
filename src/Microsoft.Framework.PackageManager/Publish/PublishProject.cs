@@ -406,7 +406,7 @@ namespace Microsoft.Framework.PackageManager.Publish
             for (int i = 0; i < root.Projects.Count; i++)
             {
                 var project = root.Projects[i];
-                var restoreCommand = new RestoreCommand(appEnv);
+                var restoreCommand = new RestoreCommand(appEnv, root.IsMono);
 
                 foreach (var runtime in root.Runtimes)
                 {

@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.Testing.xunit;
 using Microsoft.Framework.Runtime.Helpers;
+using Microsoft.Framework.Runtime.Infrastructure;
 using NuGet;
 using Xunit;
 
@@ -26,7 +27,7 @@ namespace Microsoft.Framework.Runtime.Tests
             };
 
             var frameworkName = FrameworkNameHelper.ParseFrameworkName(framework);
-            var resolver = new GacDependencyResolver();
+            var resolver = new GacDependencyResolver(CallContextServiceLocator.Locator.ServiceProvider);
             var library = resolver.GetDescription(libraryRange, frameworkName);
 
             if (found)

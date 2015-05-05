@@ -26,8 +26,7 @@ namespace Microsoft.Framework.PackageManager
 
             if (!string.IsNullOrEmpty(pathVariable))
             {
-                var isWindows = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows";
-                string dnuExecutable = isWindows ? "dnu.cmd" : "dnu";
+                string dnuExecutable = RuntimeEnvironmentHelper.IsWindows(CallContextServiceLocator.Locator.ServiceProvider) ? "dnu.cmd" : "dnu";
 
                 foreach (string folder in pathVariable.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
                 {

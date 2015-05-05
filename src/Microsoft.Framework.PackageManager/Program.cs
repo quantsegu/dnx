@@ -33,7 +33,7 @@ namespace Microsoft.Framework.PackageManager
             // Work around a Mono issue that makes restore unbearably slow,
             // due to some form of contention when requests are processed
             // concurrently. Restoring sequentially is *much* faster in this case.
-            if (PlatformHelper.IsMono)
+            if (RuntimeEnvironmentHelper.IsMono(runtimeEnv))
             {
                 ServicePointManager.DefaultConnectionLimit = 1;
             }
@@ -75,8 +75,7 @@ namespace Microsoft.Framework.PackageManager
                 c.OnExecute(async () =>
                 {
                     var feedOptions = feedCommandLineOptions.GetOptions();
-                    var isMono = ((IRuntimeEnvironment)_hostServices.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-                    var command = new RestoreCommand(_environment, isMono);
+                    var command = new RestoreCommand(_environment, RuntimeEnvironmentHelper.IsMono(_runtimeEnv));
                     command.Reports = CreateReports(optionVerbose.HasValue(), feedOptions.Quiet);
                     command.RestoreDirectory = argRoot.Value;
                     command.FeedOptions = feedOptions;
@@ -236,8 +235,7 @@ namespace Microsoft.Framework.PackageManager
                     addCmd.Version = argVersion.Value;
                     addCmd.ProjectDir = argProject.Value;
 
-                    var isMono = ((IRuntimeEnvironment)_hostServices.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-                    var restoreCmd = new RestoreCommand(_environment, isMono);
+                    var restoreCmd = new RestoreCommand(_environment, RuntimeEnvironmentHelper.IsMono(_runtimeEnv));
                     restoreCmd.Reports = reports;
                     restoreCmd.FeedOptions = feedOptions;
 
@@ -447,9 +445,9 @@ namespace Microsoft.Framework.PackageManager
                         var command = new InstallGlobalCommand(
                                 _environment,
                                 string.IsNullOrEmpty(feedOptions.TargetPackagesFolder) ?
-                                    AppCommandsFolderRepository.CreateDefault(_hostServices) :
-                                    AppCommandsFolderRepository.Create(feedOptions.TargetPackagesFolder, _hostServices),
-                                _hostServices);
+                                    AppCommandsFolderRepository.CreateDefault(_runtimeEnv) :
+                                    AppCommandsFolderRepository.Create(feedOptions.TargetPackagesFolder, _runtimeEnv),
+                                _runtimeEnv);
 
                         command.FeedOptions = feedOptions;
                         command.Reports = CreateReports(optionVerbose.HasValue(), feedOptions.Quiet);
@@ -480,7 +478,7 @@ namespace Microsoft.Framework.PackageManager
                     c.OnExecute(() =>
                     {
                         var command = new UninstallCommand(
-                            AppCommandsFolderRepository.CreateDefault(_hostServices),
+                            AppCommandsFolderRepository.CreateDefault(_runtimeEnv),
                             reports: CreateReports(optionVerbose.HasValue(), quiet: false));
 
                         command.NoPurge = optNoPurge.HasValue();
@@ -521,8 +519,7 @@ namespace Microsoft.Framework.PackageManager
                     command.InPlace = optInPlace.HasValue();
                     command.Framework = optFramework.Value();
 
-                    var isMono = ((IRuntimeEnvironment)_hostServices.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
-                    var success = command.ExecuteCommand(isMono);
+                    var success = command.ExecuteCommand(RuntimeEnvironmentHelper.IsMono(_runtimeEnv));
 
                     return success ? 0 : 1;
                 });

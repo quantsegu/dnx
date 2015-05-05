@@ -18,9 +18,10 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
 
         private readonly bool isMono;
 
-        public DnuWrapTests()
+        public DnuWrapTests(PackageManagerFunctionalTestFixture fixture)
         {
-            isMono = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+            _fixture = fixture;
+            isMono = RuntimeEnvironmentHelper.IsMono(TestUtils.CurrentRuntimeEnvironment);
         }
 
         public static IEnumerable<object[]> RuntimeComponents
@@ -32,11 +33,6 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
         }
 
         public static readonly string _msbuildPath = TestUtils.ResolveMSBuildPath();
-
-        public DnuWrapTests(PackageManagerFunctionalTestFixture fixture)
-        {
-            _fixture = fixture;
-        }
 
         [Theory]
         [MemberData("RuntimeComponents")]
@@ -194,7 +190,7 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
                 Assert.Equal(expectedLibDeltaProjectJson, File.ReadAllText(libDeltaJsonPath));
             }
         }
-        
+
         [Theory]
         [MemberData("RuntimeComponents")]
         public void DnuWrapInPlaceCreateCsprojWrappersInPlace(string flavor, string os, string architecture)
@@ -284,7 +280,7 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
         {
             var runtimeHomeDir = TestUtils.GetRuntimeHomeDir(flavor, os, architecture);
 
-            if (PlatformHelper.IsMono)
+            if (TestUtils.CurrentRuntimeEnvironment.RuntimeType == "Mono")
             {
                 return;
             }
