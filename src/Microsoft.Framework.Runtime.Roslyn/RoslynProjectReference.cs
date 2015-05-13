@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Framework.Runtime.Compilation;
-using Microsoft.Framework.Runtime.Infrastructure;
 
 namespace Microsoft.Framework.Runtime.Roslyn
 {
@@ -271,7 +270,7 @@ namespace Microsoft.Framework.Runtime.Roslyn
         {
             try
             {
-                if (RuntimeEnvironmentHelper.IsMono(CallContextServiceLocator.Locator.ServiceProvider))
+                if (RuntimeEnvironmentHelper.IsMono)
                 {
                     return false;
                 }

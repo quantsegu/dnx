@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
-using Microsoft.Framework.Runtime.Infrastructure;
 using NuGet;
 
 namespace Microsoft.Framework.Runtime
@@ -134,7 +133,7 @@ namespace Microsoft.Framework.Runtime
         public static string GetReferenceAssembliesPath()
         {
 #if DNX451
-            if (RuntimeEnvironmentHelper.IsMono(CallContextServiceLocator.Locator.ServiceProvider))
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 var mscorlibLocationOnThisRunningMonoInstance = typeof(object).GetTypeInfo().Assembly.Location;
 
@@ -178,7 +177,7 @@ namespace Microsoft.Framework.Runtime
 
             // Skip this on mono since it has a slightly different set of reference assemblies at a different
             // location
-            var isMono = RuntimeEnvironmentHelper.IsMono(CallContextServiceLocator.Locator.ServiceProvider);
+            var isMono = RuntimeEnvironmentHelper.IsMono;
             if (!isMono && FrameworkDefinitions.TryPopulateFrameworkFastPath(targetFramework.Identifier, targetFramework.Version, referenceAssembliesPath, out frameworkInfo))
             {
                 return frameworkInfo;

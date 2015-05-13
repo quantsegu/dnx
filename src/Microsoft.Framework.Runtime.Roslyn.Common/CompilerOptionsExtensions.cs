@@ -17,8 +17,7 @@ namespace Microsoft.Framework.Runtime.Roslyn
         private const string AspNetFrameworkIdentifier = "Asp.Net";
 
         public static CompilationSettings ToCompilationSettings(this ICompilerOptions compilerOptions,
-                                                                FrameworkName targetFramework,
-                                                                IServiceProvider services)
+                                                                FrameworkName targetFramework)
         {
             var options = GetCompilationOptions(compilerOptions);
 
@@ -30,7 +29,7 @@ namespace Microsoft.Framework.Runtime.Roslyn
                 { "CS1705", ReportDiagnostic.Suppress }
             });
 
-            if (RuntimeEnvironmentHelper.IsMono(services))
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 options = options.WithConcurrentBuild(concurrentBuild: false);
             }

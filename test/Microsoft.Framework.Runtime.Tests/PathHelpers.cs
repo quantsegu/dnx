@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Linq;
-using Microsoft.Framework.CommonTestUtils;
 
 namespace Microsoft.Framework.Runtime.Tests
 {
@@ -13,7 +12,7 @@ namespace Microsoft.Framework.Runtime.Tests
         {
             string root = "/root";
 
-            if (RuntimeEnvironmentHelper.IsWindows(TestUtils.CurrentRuntimeEnvironment))
+            if (RuntimeEnvironmentHelper.IsWindows)
             {
                 root = @"C:\";
             }

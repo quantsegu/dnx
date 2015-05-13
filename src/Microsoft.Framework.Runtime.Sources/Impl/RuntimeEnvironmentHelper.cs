@@ -7,24 +7,25 @@ namespace Microsoft.Framework.Runtime
 {
     internal static class RuntimeEnvironmentHelper
     {
-        public static bool IsWindows(IServiceProvider services)
+        private static Lazy<bool> _isMono = new Lazy<bool>(() => ((IRuntimeEnvironment)Services.Value.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono");
+        private static Lazy<bool> _isWindows = new Lazy<bool>(() => ((IRuntimeEnvironment)Services.Value.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows");
+
+        private static Lazy<IServiceProvider> Services = new Lazy<IServiceProvider>(() => Infrastructure.CallContextServiceLocator.Locator.ServiceProvider);
+
+        public static bool IsWindows
         {
-            return IsWindows(((IRuntimeEnvironment)services.GetService(typeof(IRuntimeEnvironment))));
+            get
+            {
+                return _isWindows.Value;
+            }
         }
 
-        public static bool IsWindows(IRuntimeEnvironment runtimeEnv)
+        public static bool IsMono
         {
-            return runtimeEnv.OperatingSystem == "Windows";
-        }
-
-        public static bool IsMono(IServiceProvider services)
-        {
-            return IsMono((IRuntimeEnvironment)services.GetService(typeof(IRuntimeEnvironment)));
-        }
-
-        public static bool IsMono(IRuntimeEnvironment runtimeEnv)
-        {
-            return runtimeEnv.RuntimeType == "Mono";
+            get
+            {
+                return _isMono.Value;
+            }
         }
     }
 }

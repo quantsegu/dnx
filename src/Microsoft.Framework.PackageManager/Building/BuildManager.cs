@@ -27,7 +27,7 @@ namespace Microsoft.Framework.PackageManager
 
             _applicationEnvironment = (IApplicationEnvironment)hostServices.GetService(typeof(IApplicationEnvironment));
 
-            ScriptExecutor = new ScriptExecutor(RuntimeEnvironmentHelper.IsMono(_hostServices));
+            ScriptExecutor = new ScriptExecutor();
         }
 
         public ScriptExecutor ScriptExecutor { get; private set; }

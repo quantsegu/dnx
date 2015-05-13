@@ -18,14 +18,10 @@ namespace Microsoft.Framework.PackageManager
 
         private readonly IAppCommandsRepository _commandsRepository;
 
-        private readonly IRuntimeEnvironment _runtimeEnv;
-
         public InstallGlobalCommand(IApplicationEnvironment env,
-                                    IAppCommandsRepository commandsRepository,
-                                    IRuntimeEnvironment runtimeEnv)
+                                    IAppCommandsRepository commandsRepository)
         {
-            _runtimeEnv = runtimeEnv;
-            RestoreCommand = new RestoreCommand(env, RuntimeEnvironmentHelper.IsMono(runtimeEnv));
+            RestoreCommand = new RestoreCommand(env);
             _commandsRepository = commandsRepository;
         }
 
@@ -247,8 +243,7 @@ namespace Microsoft.Framework.PackageManager
 
             IEnumerable<string> allAppCommandsFiles;
 
-            var isWindows = RuntimeEnvironmentHelper.IsWindows(_runtimeEnv);
-            if (isWindows)
+            if (RuntimeEnvironmentHelper.IsWindows)
             {
                 allAppCommandsFiles = Directory.EnumerateFiles(commandsFolder, "*.cmd");
             }
@@ -294,13 +289,13 @@ namespace Microsoft.Framework.PackageManager
             foreach (string commandFileFullPath in allAppCommandsFiles)
             {
                 string commandFileName =
-                    isWindows ?
+                    RuntimeEnvironmentHelper.IsWindows ?
                     Path.GetFileName(commandFileFullPath) :
                     Path.GetFileNameWithoutExtension(commandFileFullPath);
 
                 string commandScript;
 
-                if (isWindows)
+                if (RuntimeEnvironmentHelper.IsWindows)
                 {
                     commandScript = string.Format(
                         "@\"%~dp0{0}\" %*",
@@ -316,7 +311,7 @@ namespace Microsoft.Framework.PackageManager
                 string scriptFilePath = Path.Combine(installPath, commandFileName);
                 File.WriteAllText(scriptFilePath, commandScript);
 
-                if (!isWindows)
+                if (!RuntimeEnvironmentHelper.IsWindows)
                 {
                     FileOperationUtils.MarkExecutable(commandFileFullPath);
                     FileOperationUtils.MarkExecutable(scriptFilePath);

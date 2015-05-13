@@ -18,13 +18,11 @@ namespace Microsoft.Framework.PackageManager
     {
         private readonly IServiceProvider _hostServices;
         private readonly IApplicationEnvironment _environment;
-        private readonly IRuntimeEnvironment _runtimeEnv;
 
-        public Program(IServiceProvider hostServices, IApplicationEnvironment environment, IRuntimeEnvironment runtimeEnv)
+        public Program(IServiceProvider hostServices, IApplicationEnvironment environment)
         {
             _hostServices = hostServices;
             _environment = environment;
-            _runtimeEnv = runtimeEnv;
 
 #if DNX451
             Thread.GetDomain().SetData(".appDomain", this);
@@ -33,7 +31,7 @@ namespace Microsoft.Framework.PackageManager
             // Work around a Mono issue that makes restore unbearably slow,
             // due to some form of contention when requests are processed
             // concurrently. Restoring sequentially is *much* faster in this case.
-            if (RuntimeEnvironmentHelper.IsMono(runtimeEnv))
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 ServicePointManager.DefaultConnectionLimit = 1;
             }
@@ -75,7 +73,7 @@ namespace Microsoft.Framework.PackageManager
                 c.OnExecute(async () =>
                 {
                     var feedOptions = feedCommandLineOptions.GetOptions();
-                    var command = new RestoreCommand(_environment, RuntimeEnvironmentHelper.IsMono(_runtimeEnv));
+                    var command = new RestoreCommand(_environment);
                     command.Reports = CreateReports(optionVerbose.HasValue(), feedOptions.Quiet);
                     command.RestoreDirectory = argRoot.Value;
                     command.FeedOptions = feedOptions;
@@ -235,7 +233,7 @@ namespace Microsoft.Framework.PackageManager
                     addCmd.Version = argVersion.Value;
                     addCmd.ProjectDir = argProject.Value;
 
-                    var restoreCmd = new RestoreCommand(_environment, RuntimeEnvironmentHelper.IsMono(_runtimeEnv));
+                    var restoreCmd = new RestoreCommand(_environment);
                     restoreCmd.Reports = reports;
                     restoreCmd.FeedOptions = feedOptions;
 
@@ -412,7 +410,7 @@ namespace Microsoft.Framework.PackageManager
                     }
 
                     var command = new DependencyListCommand(options, _environment.RuntimeFramework);
-                    return command.Execute(_hostServices);
+                    return command.Execute();
                 });
             });
 
@@ -445,9 +443,8 @@ namespace Microsoft.Framework.PackageManager
                         var command = new InstallGlobalCommand(
                                 _environment,
                                 string.IsNullOrEmpty(feedOptions.TargetPackagesFolder) ?
-                                    AppCommandsFolderRepository.CreateDefault(_runtimeEnv) :
-                                    AppCommandsFolderRepository.Create(feedOptions.TargetPackagesFolder, _runtimeEnv),
-                                _runtimeEnv);
+                                    AppCommandsFolderRepository.CreateDefault() :
+                                    AppCommandsFolderRepository.Create(feedOptions.TargetPackagesFolder));
 
                         command.FeedOptions = feedOptions;
                         command.Reports = CreateReports(optionVerbose.HasValue(), feedOptions.Quiet);
@@ -478,7 +475,7 @@ namespace Microsoft.Framework.PackageManager
                     c.OnExecute(() =>
                     {
                         var command = new UninstallCommand(
-                            AppCommandsFolderRepository.CreateDefault(_runtimeEnv),
+                            AppCommandsFolderRepository.CreateDefault(),
                             reports: CreateReports(optionVerbose.HasValue(), quiet: false));
 
                         command.NoPurge = optNoPurge.HasValue();
@@ -519,7 +516,7 @@ namespace Microsoft.Framework.PackageManager
                     command.InPlace = optInPlace.HasValue();
                     command.Framework = optFramework.Value();
 
-                    var success = command.ExecuteCommand(RuntimeEnvironmentHelper.IsMono(_runtimeEnv));
+                    var success = command.Execute();
 
                     return success ? 0 : 1;
                 });
@@ -530,7 +527,7 @@ namespace Microsoft.Framework.PackageManager
 
         private Reports CreateReports(bool verbose, bool quiet)
         {
-            var useConsoleColor = _runtimeEnv.OperatingSystem == "Windows";
+            var useConsoleColor = false;
 
             IReport output = new Report(AnsiConsole.GetOutput(useConsoleColor));
             var reports = new Reports()

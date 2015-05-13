@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.Framework.CommonTestUtils;
 using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Infrastructure;
 using Xunit;
 
 namespace Microsoft.Framework.PackageManager.FunctionalTests
@@ -16,12 +15,9 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
     {
         private readonly PackageManagerFunctionalTestFixture _fixture;
 
-        private readonly bool isMono;
-
         public DnuWrapTests(PackageManagerFunctionalTestFixture fixture)
         {
             _fixture = fixture;
-            isMono = RuntimeEnvironmentHelper.IsMono(TestUtils.CurrentRuntimeEnvironment);
         }
 
         public static IEnumerable<object[]> RuntimeComponents
@@ -40,7 +36,7 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
         {
             var runtimeHomeDir = _fixture.GetRuntimeHomeDir(flavor, os, architecture);
 
-            if (isMono)
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 return;
             }
@@ -116,7 +112,7 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
         {
             var runtimeHomeDir = _fixture.GetRuntimeHomeDir(flavor, os, architecture);
 
-            if (isMono)
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 return;
             }
@@ -197,7 +193,7 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
         {
             var runtimeHomeDir = _fixture.GetRuntimeHomeDir(flavor, os, architecture);
 
-            if (isMono)
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 return;
             }
@@ -280,7 +276,7 @@ namespace Microsoft.Framework.PackageManager.FunctionalTests
         {
             var runtimeHomeDir = TestUtils.GetRuntimeHomeDir(flavor, os, architecture);
 
-            if (TestUtils.CurrentRuntimeEnvironment.RuntimeType == "Mono")
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 return;
             }

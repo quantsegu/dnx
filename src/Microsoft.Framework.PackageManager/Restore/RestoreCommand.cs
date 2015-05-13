@@ -25,26 +25,24 @@ namespace Microsoft.Framework.PackageManager
     public class RestoreCommand
     {
         private static readonly int MaxDegreesOfConcurrency = Environment.ProcessorCount;
-        private readonly bool _isMono;
 
-        public RestoreCommand(bool isMono) :
-            this(fallbackFramework: null, isMono: isMono)
+        public RestoreCommand() :
+            this(fallbackFramework: null)
         {
         }
 
-        public RestoreCommand(IApplicationEnvironment env, bool isMono) :
-            this(env.RuntimeFramework, isMono: isMono)
+        public RestoreCommand(IApplicationEnvironment env) :
+            this(env.RuntimeFramework)
         {
         }
 
-        public RestoreCommand(FrameworkName fallbackFramework, bool isMono)
+        public RestoreCommand(FrameworkName fallbackFramework)
         {
             FallbackFramework = fallbackFramework;
             FileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
             MachineWideSettings = new CommandLineMachineWideSettings();
-            ScriptExecutor = new ScriptExecutor(isMono);
+            ScriptExecutor = new ScriptExecutor();
             ErrorMessages = new Dictionary<string, List<string>>(StringComparer.Ordinal);
-            _isMono = isMono;
 
             Reports = new Reports
             {
@@ -903,7 +901,7 @@ namespace Microsoft.Framework.PackageManager
 
         private bool RestoringInParallel()
         {
-            return FeedOptions.Parallel && !_isMono;
+            return FeedOptions.Parallel && !RuntimeEnvironmentHelper.IsMono;
         }
 
         // Based on http://blogs.msdn.com/b/pfxteam/archive/2012/03/05/10278165.aspx

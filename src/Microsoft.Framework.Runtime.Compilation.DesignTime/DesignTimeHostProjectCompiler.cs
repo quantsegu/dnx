@@ -29,8 +29,7 @@ namespace Microsoft.Framework.Runtime
             ICompilationProject project,
             ILibraryKey target,
             Func<ILibraryExport> referenceResolver,
-            Func<IList<ResourceDescriptor>> resourcesResolver,
-            IServiceProvider services)
+            Func<IList<ResourceDescriptor>> resourcesResolver)
         {
             // The target framework and configuration are assumed to be correct
             // in the design time process

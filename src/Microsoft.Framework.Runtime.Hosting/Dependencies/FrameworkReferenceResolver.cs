@@ -17,7 +17,6 @@ namespace Microsoft.Framework.Runtime.Dependencies
     {
         private readonly ILogger Log;
         private readonly IDictionary<NuGetFramework, FrameworkInformation> _cache = new Dictionary<NuGetFramework, FrameworkInformation>();
-        private readonly IServiceProvider _services;
 
         private static readonly ISet<string> _desktopFrameworkNames = new HashSet<string>()
         {
@@ -25,10 +24,9 @@ namespace Microsoft.Framework.Runtime.Dependencies
             FrameworkConstants.FrameworkIdentifiers.Dnx
         };
 
-        public FrameworkReferenceResolver(IServiceProvider services)
+        public FrameworkReferenceResolver()
         {
             Log = RuntimeLogging.Logger<FrameworkReferenceResolver>();
-            _services = services;
         }
 
         public bool TryGetAssembly(string name, NuGetFramework targetFramework, out string path, out NuGetVersion version)
@@ -130,10 +128,10 @@ namespace Microsoft.Framework.Runtime.Dependencies
             return information.RedistListPath;
         }
 
-        public static string GetReferenceAssembliesPath(bool isMono)
+        public static string GetReferenceAssembliesPath()
         {
 #if DNX451
-            if (isMono)
+            if (RuntimeEnvironmentHelper.IsMono)
             {
                 var mscorlibLocationOnThisRunningMonoInstance = typeof(object).GetTypeInfo().Assembly.Location;
 
@@ -165,8 +163,7 @@ namespace Microsoft.Framework.Runtime.Dependencies
 
         private FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework)
         {
-            var isMono = RuntimeEnvironmentHelper.IsMono(_services);
-            string referenceAssembliesPath = GetReferenceAssembliesPath(isMono);
+            string referenceAssembliesPath = GetReferenceAssembliesPath();
 
             if (string.IsNullOrEmpty(referenceAssembliesPath))
             {
@@ -176,7 +173,8 @@ namespace Microsoft.Framework.Runtime.Dependencies
             // Skip this on mono since it has a slightly different set of reference assemblies at a different
             // location
             FrameworkInformation frameworkInfo;
-            if (!isMono && FrameworkDefinitions.TryPopulateFrameworkFastPath(targetFramework.Framework, targetFramework.Version, referenceAssembliesPath, out frameworkInfo))
+            if (!RuntimeEnvironmentHelper.IsMono
+                && FrameworkDefinitions.TryPopulateFrameworkFastPath(targetFramework.Framework, targetFramework.Version, referenceAssembliesPath, out frameworkInfo))
             {
                 return frameworkInfo;
             }

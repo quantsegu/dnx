@@ -5,7 +5,6 @@ using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Framework.Runtime.Helpers;
-using Microsoft.Framework.Runtime.Infrastructure;
 using Xunit;
 
 namespace Microsoft.Framework.Runtime.Roslyn.Tests
@@ -177,7 +176,7 @@ namespace Microsoft.Framework.Runtime.Roslyn.Tests
         {
             var framework = FrameworkNameHelper.ParseFrameworkName(frameworkName);
             return project.GetCompilerOptions(framework, "Debug")
-                          .ToCompilationSettings(framework, CallContextServiceLocator.Locator.ServiceProvider);
+                          .ToCompilationSettings(framework);
         }
     }
 }

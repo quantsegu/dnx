@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Infrastructure;
 
 namespace Microsoft.Framework.PackageManager
 {
@@ -26,7 +25,7 @@ namespace Microsoft.Framework.PackageManager
 
             if (!string.IsNullOrEmpty(pathVariable))
             {
-                string dnuExecutable = RuntimeEnvironmentHelper.IsWindows(CallContextServiceLocator.Locator.ServiceProvider) ? "dnu.cmd" : "dnu";
+                string dnuExecutable = RuntimeEnvironmentHelper.IsWindows ? "dnu.cmd" : "dnu";
 
                 foreach (string folder in pathVariable.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
                 {

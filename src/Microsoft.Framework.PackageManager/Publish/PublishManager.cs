@@ -15,18 +15,16 @@ namespace Microsoft.Framework.PackageManager.Publish
     {
         private readonly IServiceProvider _hostServices;
         private readonly PublishOptions _options;
-        private readonly bool _isMono;
 
         public PublishManager(IServiceProvider hostServices, PublishOptions options)
         {
             _hostServices = hostServices;
             _options = options;
             _options.ProjectDir = Normalize(_options.ProjectDir);
-            _isMono = RuntimeEnvironmentHelper.IsMono(_hostServices);
 
             var outputDir = _options.OutputDir ?? Path.Combine(_options.ProjectDir, "bin", "output");
             _options.OutputDir = Normalize(outputDir);
-            ScriptExecutor = new ScriptExecutor(_isMono);
+            ScriptExecutor = new ScriptExecutor();
         }
 
         public ScriptExecutor ScriptExecutor { get; private set; }
@@ -91,7 +89,7 @@ namespace Microsoft.Framework.PackageManager.Publish
 
             var frameworkContexts = new Dictionary<FrameworkName, DependencyContext>();
 
-            var root = new PublishRoot(project, outputPath, _hostServices, _options.Reports, _isMono)
+            var root = new PublishRoot(project, outputPath, _hostServices, _options.Reports)
             {
                 Configuration = _options.Configuration,
                 NoSource = _options.NoSource
@@ -292,7 +290,7 @@ namespace Microsoft.Framework.PackageManager.Publish
 
         private DependencyContext CreateDependencyContext(Runtime.Project project, FrameworkName frameworkName)
         {
-            var dependencyContext = new DependencyContext(project.ProjectDirectory, _options.Configuration, frameworkName, _hostServices);
+            var dependencyContext = new DependencyContext(project.ProjectDirectory, _options.Configuration, frameworkName);
             dependencyContext.Walk(project.Name, project.Version);
             return dependencyContext;
         }

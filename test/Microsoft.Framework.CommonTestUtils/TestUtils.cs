@@ -163,8 +163,8 @@ namespace Microsoft.Framework.CommonTestUtils
             runtimeHomePath = CreateTempDir();
             runtimeName = Path.GetFileNameWithoutExtension(runtimeNupkg);
             var runtimeRoot = Path.Combine(runtimeHomePath, "runtimes", runtimeName);
-            
-            if (!RuntimeEnvironmentHelper.IsMono(CurrentRuntimeEnvironment))
+
+            if (!RuntimeEnvironmentHelper.IsMono)
             {
                 System.IO.Compression.ZipFile.ExtractToDirectory(runtimeNupkg, runtimeRoot);
             }
@@ -383,7 +383,7 @@ namespace Microsoft.Framework.CommonTestUtils
             var p = (int)Environment.OSVersion.Platform;
             return (p != 4) && (p != 6) && (p != 128);
 #else
-            return RuntimeEnvironmentHelper.IsWindows(CurrentRuntimeEnvironment);
+            return RuntimeEnvironmentHelper.IsWindows;
 #endif
         }
     }

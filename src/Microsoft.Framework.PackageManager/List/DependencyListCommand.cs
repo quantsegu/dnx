@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Runtime.Versioning;
 using Microsoft.Framework.PackageManager.Utils;
 
@@ -18,7 +17,7 @@ namespace Microsoft.Framework.PackageManager.List
             _fallbackFramework = fallbackFramewok;
         }
 
-        public int Execute(IServiceProvider services)
+        public int Execute()
         {
             _options.Reports.Information.WriteLine("Listing dependencies for {0} ({1})", _options.Project.Name, _options.Project.ProjectFilePath);
 
@@ -35,7 +34,7 @@ namespace Microsoft.Framework.PackageManager.List
 
             foreach (var framework in frameworks)
             {
-                var operation = new DependencyListOperation(_options, framework, services);
+                var operation = new DependencyListOperation(_options, framework);
 
                 if (!operation.Execute())
                 {
