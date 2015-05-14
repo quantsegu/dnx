@@ -13,10 +13,11 @@ int _tmain(int argc, _TCHAR* argv[])
     GetVersionEx(&version_info);
 #pragma warning(default:4996)
 
-    bool is_oneCore = version_info.dwMajorVersion >= 6 && version_info.dwMinorVersion >= 2;
+    bool is_oneCore = version_info.dwMajorVersion > 6 || (version_info.dwMajorVersion == 6 && version_info.dwMinorVersion >= 2);
 
-    // TODO: temporarily using the same name until we have necessary versions of the bootstrapper dll
-    auto dnx_dll_name = is_oneCore ? L"dnx.bootstrapper.dll" : L"dnx.bootstrapper.dll";
+    auto dnx_dll_name = is_oneCore ? L"dnx_onecore.dll" : L"dnx_win32.dll";
+
+    _tprintf(L"Loading %s\n", dnx_dll_name);
 
     auto dnx_dll = LoadLibraryEx(dnx_dll_name, NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     if (!dnx_dll)

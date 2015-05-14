@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "dnx.h"
 #include "pal.h"
+#include <string>
+#include <iostream>
 
 bool LastIndexOfCharInPath(LPCTSTR const pszStr, TCHAR c, size_t* pIndex)
 {
@@ -378,6 +380,9 @@ int main(int argc, char* argv[])
 extern "C" int __stdcall DnxMain(int argc, wchar_t* argv[])
 #endif
 {
+    std::wstring s = L"Hello from STL";
+    std::wcout << s << std::endl;
+
     // Check for the debug flag before doing anything else
     for (int i = 1; i < argc; ++i)
     {
