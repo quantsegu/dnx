@@ -100,15 +100,33 @@ namespace Microsoft.Framework.PackageManager
             {
                 var sw = Stopwatch.StartNew();
 
-                // If the root argument is a project.json file
+                var projectJsonFiles = new List<string>();
+
                 if (string.Equals(
                     Runtime.Project.ProjectFileName,
                     Path.GetFileName(restoreDirectory),
-                    StringComparison.OrdinalIgnoreCase))
+                    StringComparison.OrdinalIgnoreCase) && File.Exists(restoreDirectory))
                 {
-                    restoreDirectory = Path.GetDirectoryName(Path.GetFullPath(restoreDirectory));
+                    // If the path is a project.json file we don't do recursive search in subfolders
+                    projectJsonFiles.Add(restoreDirectory);
                 }
-                else if (!Directory.Exists(restoreDirectory))
+                else if (Directory.Exists(restoreDirectory))
+                {
+                    var projectJsonFile = Path.Combine(restoreDirectory, Runtime.Project.ProjectFileName);
+                    if (File.Exists(projectJsonFile))
+                    {
+                        // If the path contains a project.json file we don't do recursive search in subfolders
+                        projectJsonFiles.Add(projectJsonFile);
+                    }
+                    else
+                    {
+                        projectJsonFiles.AddRange(Directory.EnumerateFiles(
+                            restoreDirectory,
+                            Runtime.Project.ProjectFileName,
+                            SearchOption.AllDirectories));
+                    }
+                }
+                else
                 {
                     throw new InvalidOperationException($"The given root {restoreDirectory} is invalid.");
                 }
@@ -129,10 +147,6 @@ namespace Microsoft.Framework.PackageManager
                 int restoreCount = 0;
                 int successCount = 0;
 
-                var projectJsonFiles = Directory.EnumerateFiles(
-                    restoreDirectory,
-                    Runtime.Project.ProjectFileName,
-                    SearchOption.AllDirectories);
                 Func<string, Task> restorePackage = async projectJsonPath =>
                 {
                     Interlocked.Increment(ref restoreCount);

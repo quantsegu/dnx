@@ -62,7 +62,7 @@ namespace Microsoft.Framework.PackageManager
                 c.Description = "Restore packages";
 
                 var argRoot = c.Argument("[root]",
-                    "Root of projects to restore. A value can be a path to directory/project.json/global.json. Accepts multiple values.",
+                    "List of projects and project folders to restore. Each value can be: a path to a project.json or global.json file, or a folder to recursively search for project.json files.",
                     multipleValues: true);
                 var feedCommandLineOptions = FeedCommandLineOptions.Add(c);
                 var optLock = c.Option("--lock",
