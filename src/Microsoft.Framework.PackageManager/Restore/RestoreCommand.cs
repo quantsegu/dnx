@@ -54,7 +54,7 @@ namespace Microsoft.Framework.PackageManager
 
         public FeedOptions FeedOptions { get; set; }
 
-        public string RestoreDirectory { get; set; }
+        public List<string> RestoreDirectories { get; } = new List<string>();
         public string NuGetConfigFile { get; set; }
         public bool Lock { get; set; }
         public bool Unlock { get; set; }
@@ -75,7 +75,26 @@ namespace Microsoft.Framework.PackageManager
         protected internal ISettings Settings { get; set; }
         protected internal IPackageSourceProvider SourceProvider { get; set; }
 
-        public async Task<bool> ExecuteCommand()
+        public async Task<bool> Execute()
+        {
+            if (!RestoreDirectories.Any())
+            {
+                RestoreDirectories.Add(Directory.GetCurrentDirectory());
+            }
+
+            bool success = true;
+            foreach (var dir in RestoreDirectories.Select(Path.GetFullPath).Distinct())
+            {
+                success &= await Execute(dir);
+                if (!success)
+                {
+                    break;
+                }
+            }
+            return success;
+        }
+
+        private async Task<bool> Execute(string restoreDirectory)
         {
             try
             {
@@ -84,17 +103,15 @@ namespace Microsoft.Framework.PackageManager
                 // If the root argument is a project.json file
                 if (string.Equals(
                     Runtime.Project.ProjectFileName,
-                    Path.GetFileName(RestoreDirectory),
+                    Path.GetFileName(restoreDirectory),
                     StringComparison.OrdinalIgnoreCase))
                 {
-                    RestoreDirectory = Path.GetDirectoryName(Path.GetFullPath(RestoreDirectory));
+                    restoreDirectory = Path.GetDirectoryName(Path.GetFullPath(restoreDirectory));
                 }
-                else if (!Directory.Exists(RestoreDirectory) && !string.IsNullOrEmpty(RestoreDirectory))
+                else if (!Directory.Exists(restoreDirectory))
                 {
-                    throw new InvalidOperationException("The given root is invalid.");
+                    throw new InvalidOperationException($"The given root {restoreDirectory} is invalid.");
                 }
-
-                var restoreDirectory = RestoreDirectory ?? Directory.GetCurrentDirectory();
 
                 var rootDirectory = ProjectResolver.ResolveRootDirectory(restoreDirectory);
                 ReadSettings(rootDirectory);

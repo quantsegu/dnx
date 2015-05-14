@@ -61,7 +61,9 @@ namespace Microsoft.Framework.PackageManager
             {
                 c.Description = "Restore packages";
 
-                var argRoot = c.Argument("[root]", "Root of all projects to restore. It can be a directory, a project.json, or a global.json.");
+                var argRoot = c.Argument("[root]",
+                    "Root of projects to restore. A value can be a path to directory/project.json/global.json. Accepts multiple values.",
+                    multipleValues: true);
                 var feedCommandLineOptions = FeedCommandLineOptions.Add(c);
                 var optLock = c.Option("--lock",
                     "Creates dependencies file with locked property set to true. Overwrites file if it exists.",
@@ -77,7 +79,7 @@ namespace Microsoft.Framework.PackageManager
                     var feedOptions = feedCommandLineOptions.GetOptions();
                     var command = new RestoreCommand(_environment);
                     command.Reports = CreateReports(optionVerbose.HasValue(), feedOptions.Quiet);
-                    command.RestoreDirectory = argRoot.Value;
+                    command.RestoreDirectories.AddRange(argRoot.Values);
                     command.FeedOptions = feedOptions;
                     command.Lock = optLock.HasValue();
                     command.Unlock = optUnlock.HasValue();
@@ -87,7 +89,7 @@ namespace Microsoft.Framework.PackageManager
                         Environment.SetEnvironmentVariable("http_proxy", feedOptions.Proxy);
                     }
 
-                    var success = await command.ExecuteCommand();
+                    var success = await command.Execute();
 
                     return success ? 0 : 1;
                 });
@@ -239,7 +241,7 @@ namespace Microsoft.Framework.PackageManager
                     restoreCmd.Reports = reports;
                     restoreCmd.FeedOptions = feedOptions;
 
-                    restoreCmd.RestoreDirectory = argProject.Value;
+                    restoreCmd.RestoreDirectories.Add(argProject.Value);
 
                     if (!string.IsNullOrEmpty(feedOptions.Proxy))
                     {
