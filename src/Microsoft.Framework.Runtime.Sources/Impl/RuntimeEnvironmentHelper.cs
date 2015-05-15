@@ -48,6 +48,18 @@ namespace Microsoft.Framework.Runtime
                     //_isMono = ((IRuntimeEnvironment)Services.Value.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
                 }
 
+                if (Services.Value == null)
+                {
+                    Console.WriteLine("ServiceProvider is null");
+                    throw new ArgumentNullException("ServiceProvider");
+                }
+
+                if (Services.Value.GetService(typeof(IRuntimeEnvironment)) == null)
+                {
+                    Console.WriteLine("IRuntimeEnvironment is null");
+                    throw new ArgumentNullException("IRuntimeEnvironment");
+                }
+
                 return _isMono.Value;
             }
         }
