@@ -96,6 +96,7 @@ namespace Microsoft.Framework.PackageManager
                 InstallBuilder.CommandsFolderName);
 
             // 2. Now, that we have a valid app package, we can resolve its dependecies
+            RestoreCommand.RestoreDirectories.Clear();
             RestoreCommand.RestoreDirectories.Add(packageAppFolder);
             if (!await RestoreCommand.Execute())
             {
