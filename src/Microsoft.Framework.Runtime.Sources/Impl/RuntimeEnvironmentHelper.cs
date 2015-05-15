@@ -11,11 +11,30 @@ namespace Microsoft.Framework.Runtime
         private static Lazy<bool> _isWindows = new Lazy<bool>(() => ((IRuntimeEnvironment)Services.Value.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows");
 
         private static Lazy<IServiceProvider> Services = new Lazy<IServiceProvider>(() => Infrastructure.CallContextServiceLocator.Locator.ServiceProvider);
+        //private static bool? _isWindows = null;
+        //private static bool? _isMono = null;
 
         public static bool IsWindows
         {
             get
             {
+                //if(_isWindows == null)
+                {
+                    if(Services.Value == null)
+                    {
+                        Console.WriteLine("ServiceProvider is null");
+                        throw new ArgumentNullException("ServiceProvider");
+                    }
+
+                    if(Services.Value.GetService(typeof(IRuntimeEnvironment)) == null)
+                    {
+                        Console.WriteLine("IRuntimeEnvironment is null");
+                        throw new ArgumentNullException("IRuntimeEnvironment");
+                    }
+
+                    //_isWindows = ((IRuntimeEnvironment)Services.Value.GetService(typeof(IRuntimeEnvironment))).OperatingSystem == "Windows";
+                }
+
                 return _isWindows.Value;
             }
         }
@@ -24,6 +43,11 @@ namespace Microsoft.Framework.Runtime
         {
             get
             {
+                //if(_isMono == null)
+                {
+                    //_isMono = ((IRuntimeEnvironment)Services.Value.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+                }
+
                 return _isMono.Value;
             }
         }
