@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Framework.Runtime.Caching;
 using Microsoft.Framework.Runtime.Common.DependencyInjection;
@@ -27,6 +29,7 @@ namespace Microsoft.Framework.Runtime
                                       ICacheContextAccessor cacheContextAccessor,
                                       INamedCacheDependencyProvider namedCacheDependencyProvider,
                                       IAssemblyLoadContextFactory loadContextFactory = null,
+                                      ICollection<ICompilationMessage> diagnostics = null,
                                       bool skipLockFileValidation = false)
         {
             ProjectDirectory = projectDirectory;
@@ -43,6 +46,14 @@ namespace Microsoft.Framework.Runtime
             var gacDependencyResolver = new GacDependencyResolver();
             ProjectDepencyProvider = new ProjectReferenceDependencyProvider(ProjectResolver);
             var unresolvedDependencyProvider = new UnresolvedDependencyProvider();
+
+            IEnumerable<IDependencyProvider> dependencyProviders = new IDependencyProvider[] {
+                ProjectDepencyProvider,
+                NuGetDependencyProvider,
+                referenceAssemblyDependencyResolver,
+                gacDependencyResolver,
+                unresolvedDependencyProvider
+            };
 
             var projectName = PathUtility.GetDirectoryName(ProjectDirectory);
 
@@ -65,33 +76,31 @@ namespace Microsoft.Framework.Runtime
             {
                 var lockFileReader = new LockFileReader();
                 var lockFile = lockFileReader.Read(projectLockJsonPath);
-                validLockFile = lockFile.IsValidForProject(Project);
 
-                if (validLockFile || skipLockFileValidation)
+                string message;
+                validLockFile = lockFile.IsValidForProject(Project, out message);
+
+                if (skipLockFileValidation || validLockFile)
                 {
                     NuGetDependencyProvider.ApplyLockFile(lockFile);
-
-                    DependencyWalker = new DependencyWalker(new IDependencyProvider[] {
-                        ProjectDepencyProvider,
-                        NuGetDependencyProvider,
-                        referenceAssemblyDependencyResolver,
-                        gacDependencyResolver,
-                        unresolvedDependencyProvider
-                    });
+                }
+                else
+                {
+                    // We don't add NuGetDependencyProvider to DependencyWalker
+                    // It will leave all NuGet packages unresolved and give error message asking users to run "dnu restore"
+                    dependencyProviders = dependencyProviders.Where(d => d != NuGetDependencyProvider);
+                    diagnostics?.Add(new LockFileValidationMessage(message, projectLockJsonPath));
                 }
             }
-
-            if ((!validLockFile && !skipLockFileValidation) || !lockFileExists)
+            else
             {
                 // We don't add NuGetDependencyProvider to DependencyWalker
                 // It will leave all NuGet packages unresolved and give error message asking users to run "dnu restore"
-                DependencyWalker = new DependencyWalker(new IDependencyProvider[] {
-                    ProjectDepencyProvider,
-                    referenceAssemblyDependencyResolver,
-                    gacDependencyResolver,
-                    unresolvedDependencyProvider
-                });
+                dependencyProviders = dependencyProviders.Where(d => d != NuGetDependencyProvider);
+                diagnostics?.Add(new LockFileValidationMessage("The expected lock file doesn't exist", projectLockJsonPath));
             }
+
+            DependencyWalker = new DependencyWalker(dependencyProviders);
 
             LibraryExportProvider = new CompositeLibraryExportProvider(new ILibraryExportProvider[] {
                 new ProjectLibraryExportProvider(ProjectResolver, ServiceProvider),

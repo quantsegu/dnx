@@ -1059,7 +1059,12 @@ namespace Microsoft.Framework.DesignTimeHost
             return state;
         }
 
-        private ApplicationHostContext GetApplicationHostContext(Project project, string configuration, FrameworkName frameworkName, bool useRuntimeLoadContextFactory = true)
+        private ApplicationHostContext GetApplicationHostContext(
+            Project project,
+            string configuration,
+            FrameworkName frameworkName,
+            ICollection<ICompilationMessage> diagnostics,
+            bool useRuntimeLoadContextFactory = true)
         {
             var cacheKey = Tuple.Create("ApplicationContext", project.Name, configuration, frameworkName);
 
@@ -1074,6 +1079,7 @@ namespace Microsoft.Framework.DesignTimeHost
                                                                         cacheContextAccessor: _cacheContextAccessor,
                                                                         namedCacheDependencyProvider: _namedDependencyProvider,
                                                                         loadContextFactory: GetRuntimeLoadContextFactory(project),
+                                                                        diagnostics: diagnostics,
                                                                         skipLockFileValidation: true);
 
                 applicationHostContext.DependencyWalker.Walk(project.Name, project.Version, frameworkName);
@@ -1105,13 +1111,18 @@ namespace Microsoft.Framework.DesignTimeHost
                 _namedDependencyProvider);
         }
 
-        private DependencyInfo ResolveProjectDepencies(Project project, string configuration, FrameworkName frameworkName)
+        private DependencyInfo ResolveProjectDepencies(
+            Project project,
+            string configuration,
+            FrameworkName frameworkName,
+            ICollection<ICompilationMessage> diagnostics)
         {
             var cacheKey = Tuple.Create("DependencyInfo", project.Name, configuration, frameworkName);
 
             return _cache.Get<DependencyInfo>(cacheKey, ctx =>
             {
-                var applicationHostContext = GetApplicationHostContext(project, configuration, frameworkName);
+                var applicationHostContext = GetApplicationHostContext(project, configuration,
+                    frameworkName, diagnostics);
 
                 var libraryManager = applicationHostContext.LibraryManager;
                 var frameworkResolver = applicationHostContext.FrameworkReferenceResolver;

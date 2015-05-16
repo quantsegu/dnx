@@ -138,6 +138,7 @@ Please make sure the runtime matches a framework specified in {Project.ProjectFi
             var cacheContextAccessor = new CacheContextAccessor();
             var cache = new Cache(cacheContextAccessor);
             var namedCacheDependencyProvider = new NamedCacheDependencyProvider();
+            var diagnostics = new List<ICompilationMessage>();
 
             _applicationHostContext = new ApplicationHostContext(
                 hostServices,
@@ -147,11 +148,18 @@ Please make sure the runtime matches a framework specified in {Project.ProjectFi
                 _targetFramework,
                 cache,
                 cacheContextAccessor,
-                namedCacheDependencyProvider);
+                namedCacheDependencyProvider,
+                loadContextFactory: null,
+                diagnostics: diagnostics);
 
             Logger.TraceInformation("[{0}]: Project path: {1}", GetType().Name, _projectDirectory);
             Logger.TraceInformation("[{0}]: Project root: {1}", GetType().Name, _applicationHostContext.RootDirectory);
             Logger.TraceInformation("[{0}]: Packages path: {1}", GetType().Name, _applicationHostContext.PackagesDirectory);
+
+            if (diagnostics.Any())
+            {
+                throw new InvalidOperationException(diagnostics.First().FormattedMessage);
+            }
 
             _project = _applicationHostContext.Project;
 
