@@ -991,7 +991,7 @@ namespace Microsoft.Framework.DesignTimeHost
 
             foreach (var frameworkName in frameworks)
             {
-                var dependencyInfo = ResolveProjectDepencies(project, configuration, frameworkName);
+                var dependencyInfo = ResolveProjectDepencies(project, configuration, frameworkName, state.Diagnostics);
                 var dependencySources = new List<string>(sourcesProjectWideSources);
 
                 var frameworkResolver = dependencyInfo.HostContext.FrameworkReferenceResolver;
